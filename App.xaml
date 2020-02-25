@@ -1,0 +1,61 @@
+﻿<Application x:Class="TabControlWithAnimationExample.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:TabControlWithAnimationExample"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+        <!--#region Converters -->
+        <local:NonZeroToBooleanConverter x:Key="ConvertNonZeroToBoolean"/>
+        <local:SelectedTabToBooleanConverter x:Key="ConvertSelectedTabToBoolean"/>
+        <!--#endregion -->
+
+        <!--#region Storyboards -->
+        <Storyboard x:Key="AnimationFlashYellowToOrange" Storyboard.TargetProperty="BorderBrush" RepeatBehavior="Forever" 
+                        Duration="0:0:1" FillBehavior="Stop">
+            <ObjectAnimationUsingKeyFrames>
+                <DiscreteObjectKeyFrame KeyTime="0:0:0">
+                    <DiscreteObjectKeyFrame.Value>
+                        <SolidColorBrush Color="Yellow" />
+                    </DiscreteObjectKeyFrame.Value>
+                </DiscreteObjectKeyFrame>
+                <DiscreteObjectKeyFrame KeyTime="0:0:0.5">
+                    <DiscreteObjectKeyFrame.Value>
+                        <SolidColorBrush Color="Orange" />
+                    </DiscreteObjectKeyFrame.Value>
+                </DiscreteObjectKeyFrame>
+            </ObjectAnimationUsingKeyFrames>
+        </Storyboard>
+        <!--#endregion -->
+
+
+        <Style TargetType="{x:Type Border}" x:Key="JobFilterExternalBorder">
+            <Setter Property="BorderThickness" Value="3"/>
+            <Setter Property="BorderBrush" Value="Black"/>
+            <Setter Property="CornerRadius" Value="3"/>
+            <Setter Property="Margin" Value="2,0,1,0.8"/>
+            <Style.Triggers>
+                <!-- Add Data Trigger to identify if filter is UnprocessedParts and value is > 0, and animate border to imitate a flashing border -->
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding RelativeSource={RelativeSource Mode=Self}, Path=Tag}" Value="IsUnprocessed"/>
+                        <Condition Binding="{Binding Val, Converter={StaticResource ConvertNonZeroToBoolean}}" Value="true"/>
+                        <Condition Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UserControl}, Converter={StaticResource ConvertSelectedTabToBoolean}}" Value="true"/>
+                    </MultiDataTrigger.Conditions>
+                    <MultiDataTrigger.Setters>
+                        <Setter Property="BorderThickness" Value="5"/>
+                        <Setter Property="Margin" Value="0,-2,-1,-1.2"/>
+                    </MultiDataTrigger.Setters>
+                    <MultiDataTrigger.EnterActions>
+                        <BeginStoryboard Name="FlashStoryboard" Storyboard="{StaticResource AnimationFlashYellowToOrange}">
+                        </BeginStoryboard>
+                    </MultiDataTrigger.EnterActions>
+                    <MultiDataTrigger.ExitActions>
+                        <StopStoryboard BeginStoryboardName="FlashStoryBoard"/>
+                    </MultiDataTrigger.ExitActions>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+    </Application.Resources>
+</Application>
